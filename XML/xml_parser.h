@@ -1,52 +1,64 @@
-#include <fstream>
-#include <cstdio>
+#ifndef XML_PARSER_H
+#define XML_PARSER_H
 
-#include "xml_parser.h"
+#include <vector>
 
-XmlParser* XmlParser::GetInstance() {
-    static XmlParser* instance = new XmlParser();
-    if(instance == nullptr) {
-        instance = new XmlParser();
-    }
-    return instance;
-}
+#include "xml_node.h"
 
-XmlParser::XmlParser() : file_buffer_{ "" }, root_{ nullptr } {
-    
-}
+class XmlParser {
+public:
 
-void XmlParser::PrintFileBuffer() {
-    std::cout << "size: " << file_buffer_.size() << std::endl;
-    std::cout << "capacity: " << file_buffer_.capacity() << std::endl;
-    std::cout << file_buffer_ << std::endl;
-}
+/* --- +Constructors and destructors ---------------------------------------- */ 
+  XmlParser(XmlParser &other) = delete;
+  
+/* --- +Methods ------------------------------------------------------------- */    
+  static XmlParser* GetInstance();
+  bool LoadFile(const char* filename);
+  
+  
+/* --- +Overloaded operators ------------------------------------------------ */      
+  void operator=(const XmlParser &other) = delete;
+  
+/* --- +Tools --------------------------------------------------------------- */
+  void PrintFileBuffer();
+  XmlNode* Parse(); //<--- usunac po rozwijaniu
+  
+protected:
+/* --- #Constructors and destructors ---------------------------------------- */ 
+  XmlParser();
+  
+private:
 
-bool XmlParser::LoadFile(const char* filename) {
-    bool isLoaded = false;
-    
-    FILE* f = fopen(filename, "r");
-    
-    if (f == NULL) {
-        std::cout << "File cannot be opened." << std::endl;
-    } else {
-        // Determine file size_t
-        fseek(f, 0, SEEK_END);
-        size_t size = ftell(f);
-        
-        std::cout << size << std::endl;
-        
-        char* where = new char[size];
-        
-        rewind(f);
-        fread(where, sizeof(char), size, f);
-        file_buffer_.reserve(size);
-        
-        file_buffer_.assign(where, size);
-        
-        delete[] where;
-        
-        fclose(f);
-    }
-    
-    return true;
-}
+/* --- -Parser -------------------------------------------------------------- */
+  enum class XmlTokenType {
+    kWhitespace,         // ' '
+    kOpenTag,            // '<', '</'
+    kCloseTag,           // '>', '/>'
+    kElementName,        // <'ElemenName'>...</'ElemenName'>, <'ElemenName' />
+    kAttribName,         // 'AttribName'="AttribValue"
+    kAttribValue,        // AttribName="'AttribValue'"
+    kAttribAssign,       // AttribName'='"AttribValue"
+    kAttribValueQuote,   // AttribName='"'AttribValue'"'
+    kText,                // <element>'Text'</element>
+    kReference           // '&lt;' or '&#23'
+  };
+  
+  struct XmlToken {
+      XmlTokenType type{ XmlTokenType::kWhitespace };
+      std::string data{ "" };
+  };
+
+  std::vector<XmlToken> Tokenize();
+  void PushToken(std::vector<XmlToken>& tokens, XmlToken& token);
+  //XmlNode* Parse(); <--- To jest jego miejsce
+  
+/* --- -Tools --------------------------------------------------------------- */
+  void PrintTokens(std::vector<XmlToken> tokens);
+  std::string ToString(XmlTokenType type);
+
+/* --- -Data members -------------------------------------------------------- */
+  std::string file_buffer_;
+};
+
+
+#endif // !XML_NODE_H
