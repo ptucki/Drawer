@@ -4,15 +4,6 @@
 #include <string>
 #include <string_view>
 
-/*
-   TRACE,
-   DEBUG,
-   INFO,
-   WARN,
-   ERROR,
-   FATAL
-*/
-
 enum class LogLevel {
   kTrace,
   kDebug,
@@ -31,16 +22,21 @@ public:
 
 /* --- +Methods ------------------------------------------------------------- */
   static Logger* GetInstance();
-  void Error(std::string_view message);
+  static void Trace(std::string_view message);
+  static void Debug(std::string_view message);
+  static void Info(std::string_view message);
+  static void Warn(std::string_view message);
+  static void Error(std::string_view message);
+  static void Fatal(std::string_view message);
+  
+  void SetLevel(LogLevel level);
     
 /* --- +Operator overloadings ----------------------------------------------- */    
   void operator=(const Logger& other) = delete;
   
     
 /* --- +Tools --------------------------------------------------------------- */    
-
-
-
+    
 protected:
 
 /* --- #Constructors & Destructors ------------------------------------------ */
@@ -48,6 +44,14 @@ protected:
   
   
 private:
+
+/* --- -Methods ------------------------------------------------------------- */
+  static std::string GetDate();
+  static std::string LevelToString(LogLevel level);
+  
+  bool LevelHigherOrEqual(LogLevel level);
+  bool LevelLowerOrEqual(LogLevel level);
+
   LogLevel level_;
   std::string message_buffer_;
 };
