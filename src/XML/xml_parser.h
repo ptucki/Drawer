@@ -15,6 +15,7 @@ public:
   static XmlParser* GetInstance();
   bool LoadFile(const char* filename);
   
+  
 /* --- +Overloaded operators ------------------------------------------------ */      
   void operator=(const XmlParser &other) = delete;
   
