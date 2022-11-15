@@ -33,3 +33,7 @@
 
 #testfiles
 tester.cpp
+
+
+#Cmake files
+/build/
